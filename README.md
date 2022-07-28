@@ -240,7 +240,7 @@ is  NetworkResult.Success -> {
 ```
 that’s it. we have done with the coding let’s run the code and check it. Now you can able to see the list of movies in recyclerview.
 
-![](https://miro.medium.com/max/1400/1*Q_0v0dFypqQqSiuCh7SDdg.png#x250)
+![](https://miro.medium.com/max/1400/1*Q_0v0dFypqQqSiuCh7SDdg.png#x40%)
 
 Source: https://medium.com/android-beginners/creating-android-app-using-mvvm-coroutines-flow-hilt-a8acf7f57630
 
