@@ -180,6 +180,67 @@ suspend fun getPopularMovies()  = flow {
     }
 }
 ```
+### ViewModel setup with Livedata
+In the ViewModel collect the flow and set the response to livedata for UI changes.
+```
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val mainRepository: MainRepository
+) : ViewModel() {
+private var _movieResponse = MutableLiveData<NetworkResult<List<Movie>>>()
+    val movieResponse: LiveData<NetworkResult<List<Movie>>> = _movieResponse
+init {
+        fetchAllMovies()
+    }
+private fun fetchAllMovies() {
+        viewModelScope.launch {
+            mainRepository.getPopularMovies().collect {
+                _movieResponse.postValue(it)
+            }
+        }
+    }
+}
+```
+### Observe the changes in UI
+finally, I have observed the changes from ViewModel to UI class.
+```
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+private lateinit var binding: ActivityMainBinding
+private val mainViewModel: MainViewModel by viewModels()
+    @Inject
+    lateinit var movieAdapter: MovieAdapter
+override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+binding.rvMovies.adapter = movieAdapter
+movieAdapter.setItemClick(object : ClickInterface<Movie> {
+            override fun onClick(data: Movie) {
+                Toast.makeText(this@MainActivity, data.title, Toast.LENGTH_SHORT).show()
+            }
+        })
+mainViewModel.movieResponse.observe(this) {
+            when(it) {
+                is NetworkResult.Loading -> {
+                    binding.progressbar.isVisible = it.isLoading
+                }
+is NetworkResult.Failure -> {
+                    Toast.makeText(this, it.errorMessage, Toast.LENGTH_SHORT).show()
+                    binding.progressbar.isVisible = false
+                }
+is  NetworkResult.Success -> {
+                    movieAdapter.updateMovies(it.data)
+                    binding.progressbar.isVisible = false
+                }
+            }
+        }
+}
+}
+```
+that’s it. we have done with the coding let’s run the code and check it. Now you can able to see the list of movies in recyclerview.
+
+![](https://miro.medium.com/max/1400/1*Q_0v0dFypqQqSiuCh7SDdg.png)
 
 Source: https://medium.com/android-beginners/creating-android-app-using-mvvm-coroutines-flow-hilt-a8acf7f57630
 
